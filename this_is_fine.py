@@ -3,11 +3,13 @@ import time
 from math import pow
 from math import ceil
 from telebot import types
+from re import sub
 
 
 token = "7073589577:AAFNOOEwsC6K6CFdaeKBHojUX4RtxAAP2fY"        #https://t.me/MrMonopolyManBot
 bot = telebot.TeleBot(token)
 
+input_filtered = []
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
@@ -48,18 +50,23 @@ def repeat_cred_dosrok(message):
 
 def vklad (message):
     input = str.split(message.text)
-    if len(input) != 3:
-        bot.send_message(message.chat.id, "Пожалуйста, напиши срок, ставку и сумму.")
+    global input_filtered
+    for word in input:
+        try:
+            word = word.replace("%", "")
+            word = word.replace("₽", "")
+            word = word.replace(",", ".")
+            word = float(word)
+            input_filtered.append(word)
+        except:
+            pass
+    if len(input_filtered) < 3:
         repeat_vkl(message)
         return
-    elif str.isdigit(input[0]) and str.isdigit(input[1]) and str.isdigit(input[2]) is False:
-        bot.send_message(message.chat.id, "Отправь мне, пожалуйста, только цифры.")
-        repeat_vkl(message)
-        return
-    for unit in range(len(input)):
-        input[unit] = int(input[unit])
-    result = input[2]*input[1]/100*input[0]/365
-    bot.send_message(message.chat.id, "За " + str(input[0]) + " дней ты заработаешь ≈" + str(result) + "₽")
+    for i in range(3):
+        input_filtered[i] = int(input_filtered[i])
+    result = input_filtered[2]*input_filtered[1]/100*input_filtered[0]/365
+    bot.send_message(message.chat.id, "За " + str(input_filtered[0]) + " дней ты заработаешь ≈" + str(result) + "₽")
 
 def fifty_two_days(message):
     value = message.text
@@ -111,49 +118,57 @@ def fifty_two_days(message):
     bot.send_message(message.chat.id, result)
     return
 
-
 def cred_dosrok(message):
     input = str.split(message.text)
-    if len(input) != 3:
-        bot.send_message(message.chat.id, "Пожалуйста, напиши сумму, ставку (годовую) и срок кредитования (в месяцах).")
+    global input_filtered
+    for word in input:
+        try:
+            word = word.replace("%", "")
+            word = word.replace("₽", "")
+            word = word.replace(",",".")
+            word = float(word)
+            input_filtered.append(word)
+        except:
+            pass
+    if len(input_filtered) <3:
         repeat_cred_dosrok(message)
         return
-    elif str.isdigit(input[0]) and str.isdigit(input[1]) and str.isdigit(input[2]) is False:
-        bot.send_message(message.chat.id, "Отправь мне, пожалуйста, только цифры.")
-        repeat_cred_dosrok(message)
-        return
-    for unit in range(len(input)):
-        if unit != 1:
-            input[unit] = int(input[unit])
-        else:
-            input[unit] = float(input[unit])
-    input[1]=input[1]/(100*12)
-    result = input[0]*(input[1]/(1-pow(1+input[1],-input[2])))
-    overpay = (result*input[2])-input[0]
-    bot.send_message(message.chat.id, "Тебе нужно выплачивать "+str(ceil(result))+" каждый месяц, по итогу переплата по процентам составит "+str(ceil(overpay)))
-
+    for i in range(3):
+        if i != 1:
+            input_filtered[i] = int(input_filtered[i])
+    input_filtered[1] = input_filtered[1] / (100 * 12)
+    result = input_filtered[0] * (input_filtered[1] / (1 - pow(1 + input_filtered[1], -input_filtered[2])))
+    overpay = (result * input_filtered[2]) - input_filtered[0]
+    bot.send_message(message.chat.id, "Тебе нужно выплачивать " + str(
+        ceil(result)) + " каждый месяц, по итогу переплата по процентам составит " + str(ceil(overpay)))
+    input_filtered = []
 
 def cred(message):
     input = str.split(message.text)
-    if len(input) != 3:
-        bot.send_message(message.chat.id, "Пожалуйста, напиши сумму, ставку (годовую) и срок кредитования (в месяцах).")
+    global input_filtered
+    for word in input:
+        try:
+            word = word.replace("%", "")
+            word = word.replace("₽", "")
+            word = word.replace(",",".")
+            word = float(word)
+            input_filtered.append(word)
+        except:
+            pass
+    if len(input_filtered) <3:
         repeat_cred(message)
         return
-    elif str.isdigit(input[0]) and str.isdigit(input[1]) and str.isdigit(input[2]) is False:
-        bot.send_message(message.chat.id, "Отправь мне, пожалуйста, только цифры.")
-        repeat_cred(message)
-        return
-    for unit in range(len(input)):
-        if unit != 1:
-            input[unit] = int(input[unit])
-        else:
-            input[unit] = float(input[unit])
-    input[1] = input[1] / (100*12)
-    start_sum = input[0]
-    for month in range(input[2]):
-        input[0]+=input[0]*input[1]
-    bot.send_message(message.chat.id, "По итогу в конце срока будет долг "+str(ceil(input[0]))+", переплата составит " + str(ceil(input[0]-start_sum)))
-
+    for i in range(3):
+        if i != 1:
+            input_filtered[i] = int(input_filtered[i])
+    input_filtered[1] = input_filtered[1] / (100 * 12)
+    start_sum = input_filtered[0]
+    for month in range(input_filtered[2]):
+        input_filtered[0] += input_filtered[0] * input_filtered[1]
+    bot.send_message(message.chat.id,
+                     "По итогу в конце срока будет долг " + str(ceil(input_filtered[0])) + ", переплата составит " + str(
+                         ceil(input_filtered[0] - start_sum)))
+    input_filtered = []
 
 @bot.message_handler(content_types=['text'])
 def message_reply(message):
@@ -171,7 +186,7 @@ def message_reply(message):
         case "Об игре":
             bot.send_message(message.chat.id, "В этой игре, ты должен откладывать некоторую сумму денег в течении 52 недель, но каждый раз ты должен прибавлять к этой сумме столько, сколько отложил в первую неделю")
         case "Вклады":
-            bot.send_message(message.chat.id, "Прекрасно! Напиши мне срок(в днях), ставку и сумму вклада")
+            bot.send_message(message.chat.id, "Прекрасно! Напиши мне срок(в днях), годовую ставку и сумму вклада")
             bot.register_next_step_handler(message, vklad)
         case "Кредиты":
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -181,9 +196,9 @@ def message_reply(message):
             markup.add(button2)
             bot.send_message(message.chat.id, "Хорошо, сейчас разберемся. Выбери сначала способ погашения.", reply_markup=markup)
         case "Досрочное погашение":
-            bot.send_message(message.chat.id, "Хорошо, тогда напиши мне сумму займа, ставку, срок кредитования (в месяцах)")
+            bot.send_message(message.chat.id, "Хорошо, тогда напиши мне сумму займа, процентную ставку и срок кредитования (в месяцах)")
             bot.register_next_step_handler(message, cred_dosrok)
         case "Погашение":
-            bot.send_message(message.chat.id, "Хорошо, тогда напиши мне сумму займа, ставку, срок кредитования (в месяцах)")
+            bot.send_message(message.chat.id, "Хорошо, тогда напиши мне сумму займа, процентную ставку и срок кредитования (в месяцах)")
             bot.register_next_step_handler(message, cred)
 bot.infinity_polling()
