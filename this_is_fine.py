@@ -3,8 +3,6 @@ import time
 from math import pow
 from math import ceil
 from telebot import types
-from re import sub
-
 
 token = "7073589577:AAFNOOEwsC6K6CFdaeKBHojUX4RtxAAP2fY"        #https://t.me/MrMonopolyManBot
 bot = telebot.TeleBot(token)
@@ -30,7 +28,7 @@ def games_message_reply(message):
 
 
 @bot.message_handler(commands=['calcs'])
-def games_message_reply(message):
+def calcs_message_reply(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     button1 = types.KeyboardButton("Кредиты")
     markup.add(button1)
@@ -171,7 +169,7 @@ def cred(message):
     input_filtered = []
 
 @bot.message_handler(content_types=['text'])
-def message_reply(message):
+def main_message_reply(message):
     match message.text:
         case "52 недели богатства":
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
